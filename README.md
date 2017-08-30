@@ -32,7 +32,7 @@ Uses the following libraries:
 - [Axios](https://github.com/mzabriskie/axios) for ajax calls
 
 ### Notes
-In order to work in IE a polyfill for Function.Name will be needed or Function.Name uses would need to be replaced. Function.Name used to run vuex mutations and actions.
+In order to work in IE a polyfill for Function.Name and Promise was needed. Function.Name is used to run vuex mutations and actions.
 
 There is no production node server yet defined.
 
