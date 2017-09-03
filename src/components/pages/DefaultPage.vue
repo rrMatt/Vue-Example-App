@@ -6,7 +6,7 @@
       </header>
       <p>This is an example Vue component</p>
       <p>
-        <span>Current Count = {{count}}</span>
+        <span>Current Count = {{counter}}</span>
         <el-button @click="increment">
             <i class="fa fa-plus" aria-hidden="true"></i>
         </el-button>
@@ -14,6 +14,7 @@
             <i class="fa fa-minus" aria-hidden="true"></i>
         </el-button>
       </p>
+      <p v-if="hasHitTarget">You've hit the target of {{target}}</p>
   </section>
 </template>
 
@@ -22,16 +23,22 @@ export default {
     name:'DefaultPage',
     data: function(){
         return {
-            count: 0
+            counter: 0,
+            target: 3
+        }
+    },
+    computed:{
+        hasHitTarget: function(){
+            return this.counter >= this.target;
         }
     },
     methods: {
         increment(){
-            this.count++;
+            this.counter++;
         },
         decrement(){
-            if(this.count){
-                this.count--;
+            if(this.counter){
+                this.counter--;
             }
         }
     }

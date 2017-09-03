@@ -41,7 +41,7 @@
             size="small" 
             :close-on-click-modal="false"
             :visible.sync="createModalVisible">
-            <UserForm @submit="createUser" @cancel="closeModals" :userData="userToAdd" />
+            <UserForm @submit="createUser" @cancel="closeModals" :loading="isCreating" />
         </el-dialog>
 
          <el-dialog 
@@ -49,7 +49,7 @@
             size="small" 
             :close-on-click-modal="false"
             :visible.sync="editModalVisible">
-            <UserForm @submit="editUser" @cancel="closeModals" :userData="userToEdit" />
+            <UserForm @submit="editUser" @cancel="closeModals" :userData="userToEdit" :loading="isUpdating" />
         </el-dialog> 
 
         <el-dialog 
@@ -59,7 +59,7 @@
             :visible.sync="deleteModalVisible">
             <p>Are you sure you wish to delete user {{userToDelete.firstName}} {{userToDelete.lastName}}?</p>
             <p class="pull-right">
-                <el-button type="success" @click="deleteUser">Confirm</el-button>
+                <el-button type="success" @click="deleteUser(userToDelete.id)" :loading="isDeleting">Confirm</el-button>
                 <el-button @click="closeModals">Cancel</el-button>
             </p>
         </el-dialog> 
@@ -70,7 +70,7 @@
 <script>
 import UserForm from '@/components/UserForm'
 import { mapState, mapActions   } from 'vuex'
-import { usersNamespace, usersSelector } from '../../store/namespaceHelpers'
+import { usersNamespace } from '../../store/namespaces'
 import { actions } from '../../store/users'
 
 
@@ -79,7 +79,6 @@ export default {
     data: function(){
         return {
             createModalVisible: false,
-            userToAdd: {},
             editModalVisible: false,
             userToEdit: {},
             deleteModalVisible: false,
@@ -90,20 +89,32 @@ export default {
         userCount: function(){
             return this.users.length;
         },
-        ...mapState({
-            users: state => usersSelector(state).list,
-            loading: state => usersSelector(state).listRequest.isLoading,
+        ...mapState(usersNamespace, {
+            users: state =>state.list,
+            loading: state => state.listRequest.isLoading,
+            isCreating: state => state.createRequest.isLoading,
+            isUpdating: state => state.updateRequest.isLoading,
+            isDeleting: state => state.deleteRequest.isLoading,
         }),
+
+        changeStatus: function(){
+            const { isDeleting, isCreating, isUpdating } = this;
+            return { isCreating, isUpdating, isDeleting }
+        }
     },
     beforeMount: function(){
         this.loadUsers();
     },
     methods:{
-        loadUsers(){
-            this.$store.dispatch(usersNamespace + actions.getUsers.name);
-        },
+
+        ...mapActions(usersNamespace, {
+            loadUsers: actions.getUsers.name,
+            createUser: actions.createUser.name,
+            editUser: actions.updateUser.name,
+            deleteUser: actions.deleteUser.name,
+        }),
+
         startCreate(){
-            this.userToAdd = {};
             this.createModalVisible = true;
         },
         startEdit(user){
@@ -114,35 +125,25 @@ export default {
             this.userToDelete = user;
             this.deleteModalVisible = true;
         },
-        createUser(user){
-            this.$store.dispatch(usersNamespace + actions.createUser.name, user)
-                .then(res => { 
-                    this.createModalVisible = false;
-                    this.loadUsers();
-                })
-                .catch(err => console.log("create user error", err));
-        },
-        editUser(user){
-            this.$store.dispatch(usersNamespace + actions.updateUser.name, user)
-                .then(res => { 
-                    this.editModalVisible = false;
-                    this.loadUsers();
-                })
-                .catch(err => console.log("update user error", err));
-        },
-        deleteUser(){
-            this.$store.dispatch(usersNamespace + actions.deleteUser.name, this.userToDelete.id)
-                .then(res => { 
-                    this.deleteModalVisible = false;
-                    this.loadUsers();
-                })
-                .catch(err => console.log("delete user error", err));
-        },
+
         closeModals(){
             this.createModalVisible = false;
             this.editModalVisible = false;
             this.deleteModalVisible = false;
         },
+
+    },
+
+    watch:{
+        changeStatus: function(val, oldVal){
+            const needsReload = function(next,prev){
+                return prev === true && next === false;
+            }.bind(this);
+            if(needsReload(val.isCreating, oldVal.isCreating) || needsReload(val.isUpdating, oldVal.isUpdating) || needsReload(val.isDeleting, oldVal.isDeleting)){
+                this.closeModals();
+                this.loadUsers();
+            }
+        }
     },
     components:{
         UserForm

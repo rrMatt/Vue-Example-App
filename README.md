@@ -34,6 +34,5 @@ Uses the following libraries:
 ### Notes
 In order to work in IE a polyfill for Function.Name and Promise was needed. Function.Name is used to run vuex mutations and actions.
 
-There is no production node server yet defined.
-
 When running in Visual Studio Code the [Vetur](https://vuejs.github.io/vetur/) extension is recommended.
+[Vue dev tools](https://github.com/vuejs/vue-devtools) are recommended for development.

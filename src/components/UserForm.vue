@@ -24,7 +24,7 @@
             </el-row>
 
             <p class="pull-right">
-                <el-button type="success" @click="submit">Save</el-button>
+                <el-button type="success" @click="submit" :loading="loading">Save</el-button>
                 <el-button @click="cancel">Cancel</el-button>
             </p>
 
@@ -38,12 +38,13 @@ import VueTypes from 'vue-types'
 export default {
   name: 'UserForm',
   props: {
-      userData: VueTypes.shape({
-          id: VueTypes.any,
-          firstName: String,
-          lastName: String,
-          email: String,
-      }).loose
+      loading: VueTypes.bool,
+      userData: VueTypes.object.def(VueTypes.shape({
+          id: VueTypes.string,
+          firstName: VueTypes.string,
+          lastName: VueTypes.string,
+          email: VueTypes.string,
+      }).loose)
   },
   data: function(){
       return {
