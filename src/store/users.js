@@ -1,5 +1,4 @@
 import axios from 'axios'
-// NOTE: function.name is not compatible in IE - need a polyfill
 
 export const state = {
     list: [],
@@ -42,10 +41,10 @@ export const actions = {
         commit(mutations.setUserListLoading.name, true);
         return new Promise(function(resolve, reject){
             axios.get('/api/users')
-                .then(response => setTimeout(() => {
+                .then(response => {
                     commit(mutations.setUserList.name, response.data);
                     resolve();
-                }, 1000))
+                })
                 .catch(error => { 
                     commit(mutations.setUserListLoading.name, false);
                     reject();
